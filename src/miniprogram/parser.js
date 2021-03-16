@@ -184,8 +184,8 @@ parser.prototype.parseStyle = function (node) {
     // 暴露锚点
     if (this.options.useAnchor)
       this.expose()
-    else if (node.name != 'img' && node.name != 'a' && node.name != 'video' && node.name != 'audio')
-      attrs.id = void 0
+    // else if (node.name != 'img' && node.name != 'a' && node.name != 'video' && node.name != 'audio')
+    //   attrs.id = void 0
   }
 
   // 转换 width 和 height 属性
@@ -204,6 +204,12 @@ parser.prototype.parseStyle = function (node) {
       continue
     var key = info.shift().trim().toLowerCase(),
       value = info.join(':').trim()
+    // add img kids
+    if (node.name === 'img' && key === 'content' && value.includes('--kid')) {
+      const kidStr = value.replace(/--|var|\)|\(/g, '')
+      node.attrs.class = node.attrs.class ? node.attrs.class + ` ${kidStr}` : kidStr
+      node.attrs['data-kid'] = kidStr.replace('kid-', '')
+    }
     // 兼容性的 css 不压缩
     if ((value[0] == '-' && value.lastIndexOf('-') > 0) || value.includes('safe'))
       tmp += `;${key}:${value}`
@@ -253,6 +259,8 @@ parser.prototype.onAttrName = function (name) {
       this.attrName = 'src'
     // a 和 img 标签保留 data- 的属性，可以在 imgtap 和 linktap 事件中使用
     else if (this.tagName == 'img' || this.tagName == 'a')
+      this.attrName = name
+    else if (name === 'data-kid')
       this.attrName = name
     // 剩余的移除以减小大小
     else
@@ -499,6 +507,11 @@ parser.prototype.popNode = function () {
         this.pre = true
   }
 
+  if (node.attrs['data-kid']) {
+    const kidStr = `kid-${node.attrs['data-kid']}`
+    node.attrs.class = node.attrs.class ? node.attrs.class + ` ${kidStr}` : kidStr
+  }
+
   // 转换 svg
   if (node.name == 'svg') {
     let src = '', style = attrs.style
@@ -585,7 +598,7 @@ parser.prototype.popNode = function () {
   else if (!config.trustTags[node.name] && !this.xml)
     node.name = 'span'
 
-  else if (node.name == 'a' || node.name == 'ad')
+  else if (node.name == 'a' || node.name == 'ad' || node.attrs['data-kid'])
     this.expose()
 
   else if (node.name == 'video' || node.name == 'audio')

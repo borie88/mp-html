@@ -34,17 +34,17 @@
   <!-- 图片 -->
   <block wx:if="{{n.name=='img'}}">
     <!-- 占位图 -->
-    <image wx:if="{{(opts[1]&&!ctrl[i])||ctrl[i]<0}}" class="_img" style="{{n.attrs.style}}" src="{{ctrl[i]<0?opts[2]:opts[1]}}" mode="widthFix" />
+    <image wx:if="{{(opts[1]&&!ctrl[i])||ctrl[i]<0}}" class="_img" style="{{n.attrs.style}}" data-kid="{{n.attrs['data-kid']}}" src="{{ctrl[i]<0?opts[2]:opts[1]}}" mode="widthFix" />
     <!-- 显示图片 -->
-    <image id="{{n.attrs.id}}" class="_img {{n.attrs.class}}" style="{{ctrl[i]==-1?'display:none;':''}}width:{{ctrl[i]||1}}px;height:1px;{{n.attrs.style}}" src="{{n.attrs.src}}" mode="{{n.h?'':'widthFix'}}" lazy-load="{{opts[0]}}" mp-weixin:mp-baidu:webp="{{n.webp}}" mp-weixin:show-menu-by-longpress="{{opts[3]&&!n.attrs.ignore}}" mp-baidu:image-menu-prevent="{{!opts[3]||n.attrs.ignore}}" data-i="{{i}}" bindload="imgLoad" binderror="mediaError" catchtap="imgTap" bindlongpress="noop" />
+    <image id="{{n.attrs.id}}" class="_img {{n.attrs.class}}" data-kid="{{n.attrs['data-kid']}}" style="{{ctrl[i]==-1?'display:none;':''}}width:{{ctrl[i]||1}}px;height:1px;{{n.attrs.style}}" src="{{n.attrs.src}}" mode="{{n.h?'':'widthFix'}}" lazy-load="{{opts[0]}}" mp-weixin:mp-baidu:webp="{{n.webp}}" mp-weixin:show-menu-by-longpress="{{opts[3]&&!n.attrs.ignore}}" mp-baidu:image-menu-prevent="{{!opts[3]||n.attrs.ignore}}" data-i="{{i}}" bindload="imgLoad" binderror="mediaError" catchtap="imgTap" bindlongpress="noop" />
   </block>
   <!-- 文本 -->
   <!-- #ifndef MP-BAIDU -->
-  <text wx:elif="{{n.type=='text'}}" mp-weixin:user-select="{{n.us}}" decode>{{n.text}}</text>
+  <text wx:elif="{{n.type=='text'}}" id="{{n.attrs.id}}" class="_text {{n.attrs.class}}" data-kid="{{n.attrs['data-kid']}}" mp-weixin:user-select="{{n.us}}" decode>{{n.text}}</text>
   <!-- #endif -->
-  <text wx:elif="{{n.name=='br'}}">\n</text>
+  <text wx:elif="{{n.name=='br'}}" id="{{n.attrs.id}}" class="_{{n.name}} {{n.attrs.class}}" data-kid="{{n.attrs['data-kid']}}">\n</text>
   <!-- 链接 -->
-  <view wx:elif="{{n.name=='a'}}" id="{{n.attrs.id}}" class="{{n.attrs.href?'_a ':''}}{{n.attrs.class}}" hover-class="_hover" style="display:inline;{{n.attrs.style}}" data-i="{{i}}" mp-weixin:mp-qq:capture-catch:tap="linkTap" mp-baidu:mp-alipay:mp-toutiao:catchtap="linkTap">
+  <view wx:elif="{{n.name=='a'}}" id="{{n.attrs.id}}" class="{{n.attrs.href?'_a ':''}}{{n.attrs.class}}" hover-class="_hover" style="display:inline;{{n.attrs.style}}" data-i="{{i}}" data-kid="{{n.attrs['data-kid']}}" mp-weixin:mp-qq:capture-catch:tap="linkTap" mp-baidu:mp-alipay:mp-toutiao:catchtap="linkTap">
     <!-- #ifdef MP-WEIXIN || MP-QQ -->
     <node childs="{{n.children}}" opts="{{opts}}" />
     <!-- #endif -->
@@ -53,14 +53,17 @@
     <!-- #endif -->
   </view>
   <!-- 视频 -->
-  <video wx:elif="{{n.name=='video'}}" id="{{n.attrs.id}}" class="{{n.attrs.class}}" style="{{n.attrs.style}}" autoplay="{{n.attrs.autoplay}}" controls="{{n.attrs.controls}}" loop="{{n.attrs.loop}}" muted="{{n.attrs.muted}}" poster="{{n.attrs.poster}}" src="{{n.src[ctrl[i]||0]}}" data-i="{{i}}" bindplay="play" binderror="mediaError" />
+  <video wx:elif="{{n.name=='video'}}" id="{{n.attrs.id}}" class="{{n.attrs.class}}" style="{{n.attrs.style}}" autoplay="{{n.attrs.autoplay}}" controls="{{n.attrs.controls}}" loop="{{n.attrs.loop}}" muted="{{n.attrs.muted}}" poster="{{n.attrs.poster}}" src="{{n.src[ctrl[i]||0]}}" data-i="{{i}}" data-kid="{{n.attrs['data-kid']}}" bindplay="play" binderror="mediaError" />
   <!-- #ifndef MP-TOUTIAO -->
   <!-- 音频 -->
-  <audio wx:elif="{{n.name=='audio'}}" id="{{n.attrs.id}}" class="{{n.attrs.class}}" style="{{n.attrs.style}}" author="{{n.attrs.author}}" controls="{{n.attrs.controls}}" loop="{{n.attrs.loop}}" name="{{n.attrs.name}}" poster="{{n.attrs.poster}}" src="{{n.src[ctrl[i]||0]}}" data-i="{{i}}" bindplay="play" binderror="mediaError" />
+  <audio wx:elif="{{n.name=='audio'}}" id="{{n.attrs.id}}" class="{{n.attrs.class}}" style="{{n.attrs.style}}" author="{{n.attrs.author}}" controls="{{n.attrs.controls}}" loop="{{n.attrs.loop}}" name="{{n.attrs.name}}" poster="{{n.attrs.poster}}" src="{{n.src[ctrl[i]||0]}}" data-i="{{i}}" data-kid="{{n.attrs['data-kid']}}" bindplay="play" binderror="mediaError" />
   <!-- #endif -->
   <!-- insert -->
   <!-- 富文本 -->
-  <rich-text wx:else id="{{n.attrs.id}}" mp-weixin:mp-qq:mp-baidu:mp-toutiao:style="{{n.f}}" mp-alipay:style="{{n.f}};display:inline" mp-baidu:selectable="{{false}}" nodes="{{[n]}}" />
+  <view wx:else id="{{n.attrs.id}}" class="_{{n.name}} {{n.attrs.class}}" style="{{n.attrs.style}}" data-i="{{i}}" data-kid="{{n.attrs['data-kid']}}" mp-weixin:mp-qq:capture-catch:tap="elTap" mp-baidu:mp-alipay:mp-toutiao:catchtap="elTap">
+    <node childs="{{n.children}}" opts="{{opts}}" />
+  </view>
+  <!-- <rich-text wx:else id="{{n.attrs.id}}" mp-weixin:mp-qq:mp-baidu:mp-toutiao:style="{{n.f}}" mp-alipay:style="{{n.f}};display:inline" mp-baidu:selectable="{{false}}" nodes="{{[n]}}" /> -->
 </template>
 <!-- #ifdef MP-ALIPAY || MP-TOUTIAO -->
 <template name="node">
@@ -77,23 +80,23 @@
 <!-- 第 1 层 -->
 <block wx:for="{{childs}}" wx:for-item="n1" wx:for-index="i1" wx:key="i1">
   <template mp-weixin:mp-qq:wx:if="{{use(n1)}}" mp-baidu:wx:if="{{!n1.c}}" is="el" data="{{n:n1,i:''+i1,opts:opts,ctrl:ctrl}}" />
-  <view wx:else id="{{n1.attrs.id}}" class="_{{n1.name}} {{n1.attrs.class}}" style="{{n1.attrs.style}}">
+  <view wx:else id="{{n1.attrs.id}}" class="_{{n1.name}} {{n1.attrs.class}}" style="{{n1.attrs.style}}" data-i="{{''+i1}}" data-kid="{{n1.attrs['data-kid']}}" mp-weixin:mp-qq:mp-baidu:mp-alipay:mp-toutiao:catchtap="elTap">
     <!-- 第 2 层 -->
     <block wx:for="{{n1.children}}" wx:for-item="n2" wx:for-index="i2" wx:key="i2">
       <template mp-weixin:mp-qq:wx:if="{{use(n2)}}" mp-baidu:wx:if="{{!n2.c}}" is="el" data="{{n:n2,i:i1+'_'+i2,opts:opts,ctrl:ctrl}}" />
-      <view wx:else id="{{n2.attrs.id}}" class="_{{n2.name}} {{n2.attrs.class}}" style="{{n2.attrs.style}}">
+      <view wx:else id="{{n2.attrs.id}}" class="_{{n2.name}} {{n2.attrs.class}}" style="{{n2.attrs.style}}" data-i="{{i1+'_'+i2}}" data-kid="{{n2.attrs['data-kid']}}" mp-weixin:mp-qq:mp-baidu:mp-alipay:mp-toutiao:catchtap="elTap">
         <!-- 第 3 层 -->
         <block wx:for="{{n2.children}}" wx:for-item="n3" wx:for-index="i3" wx:key="i3">
           <template mp-weixin:mp-qq:wx:if="{{use(n3)}}" mp-baidu:wx:if="{{!n3.c}}" is="el" data="{{n:n3,i:i1+'_'+i2+'_'+i3,opts:opts,ctrl:ctrl}}" />
-          <view wx:else id="{{n3.attrs.id}}" class="_{{n3.name}} {{n3.attrs.class}}" style="{{n3.attrs.style}}">
+          <view wx:else id="{{n3.attrs.id}}" class="_{{n3.name}} {{n3.attrs.class}}" style="{{n3.attrs.style}}" data-i="{{i1+'_'+i2+'_'+i3}}" data-kid="{{n3.attrs['data-kid']}}" mp-weixin:mp-qq:mp-baidu:mp-alipay:mp-toutiao:catchtap="elTap">
             <!-- 第 4 层 -->
             <block wx:for="{{n3.children}}" wx:for-item="n4" wx:for-index="i4" wx:key="i4">
               <template mp-weixin:mp-qq:wx:if="{{use(n4)}}" mp-baidu:wx:if="{{!n4.c}}" is="el" data="{{n:n4,i:i1+'_'+i2+'_'+i3+'_'+i4,opts:opts,ctrl:ctrl}}" />
-              <view wx:else id="{{n4.attrs.id}}" class="_{{n4.name}} {{n4.attrs.class}}" style="{{n4.attrs.style}}">
+              <view wx:else id="{{n4.attrs.id}}" class="_{{n4.name}} {{n4.attrs.class}}" style="{{n4.attrs.style}}" data-i="{{i1+'_'+i2+'_'+i3+'_'+i4}}" data-kid="{{n4.attrs['data-kid']}}" mp-weixin:mp-qq:mp-baidu:mp-alipay:mp-toutiao:catchtap="elTap">
                 <!-- 第 5 层 -->
                 <block wx:for="{{n4.children}}" wx:for-item="n5" wx:for-index="i5" wx:key="i5">
                   <template mp-weixin:mp-qq:wx:if="{{use(n5)}}" mp-baidu:wx:if="{{!n5.c}}" is="el" data="{{n:n5,i:i1+'_'+i2+'_'+i3+'_'+i4+'_'+i5,opts:opts,ctrl:ctrl}}" />
-                  <node wx:else id="{{n5.attrs.id}}" class="_{{n5.name}} {{n5.attrs.class}}" style="{{n5.attrs.style}}" childs="{{n5.children}}" opts="{{opts}}" />
+                  <node wx:else id="{{n5.attrs.id}}" class="_{{n5.name}} {{n5.attrs.class}}" style="{{n5.attrs.style}}" data-i="{{i1+'_'+i2+'_'+i3+'_'+i4+'_'+i5}}" data-kid="{{n5.attrs['data-kid']}}" mp-weixin:mp-qq:mp-baidu:mp-alipay:mp-toutiao:catchtap="elTap" childs="{{n5.children}}" opts="{{opts}}" />
                 </block>
               </view>
             </block>

@@ -146,6 +146,15 @@ Component({
     },
 
     /**
+     * @description Tap an element
+     * @param {Event} e 
+     */
+    elTap(e) {
+      var node = this.getNode(e.currentTarget.dataset.i)
+      this.root.triggerEvent('eltap', node.attrs)
+    },
+
+    /**
      * @description 错误事件
      * @param {Event} e 
      */
