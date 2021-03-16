@@ -17,12 +17,11 @@ test('render', async () => {
       copyLink: true,
       pauseVideo: true,
       previewImg: true,
-      showWithAnimation: true,
       useAnchor: true
     },
     template:
       `<scroll-view id="scroll" style="height:100px" scroll-y scroll-top="{{top}}">
-  <mp-html id="article" content="{{html}}" domain="https://6874-html-foe72-1259071903.tcb.qcloud.la/demo" copy-link="{{copyLink}}" loading-img="xxx" error-img="xxx" lazy-load pause-video="{{pauseVideo}}" preview-img="{{previewImg}}" scroll-table show-with-animation="{{showWithAnimation}}" use-anchor="{{useAnchor}}">加载中...</mp-html>
+  <mp-html id="article" content="{{html}}" domain="https://6874-html-foe72-1259071903.tcb.qcloud.la/demo" copy-link="{{copyLink}}" loading-img="xxx" error-img="xxx" lazy-load pause-video="{{pauseVideo}}" preview-img="{{previewImg}}" scroll-table use-anchor="{{useAnchor}}">加载中...</mp-html>
 </scroll-view>`,
     usingComponents: {
       'mp-html': mpHtml
@@ -40,14 +39,16 @@ test('render', async () => {
   const comp = page.querySelector('#article')
   expect(comp.dom.tagName).toBe('MP-HTML')
 
-  page.setData({
-    showWithAnimation: false // 取消动画
-  })
+
   await simulate.sleep(50)
 
   comp.instance.setContent(
     `<!-- 测试 base 标签 -->
 <base href="https://xxx.com">
+<!-- 测试 script 标签 -->
+<script>
+console.log('11')
+</script>
 <!-- 测试 embed 标签 -->
 <embed src="xxx.mp4" />
 <embed autostart src="xxx.m4a" />
@@ -146,10 +147,15 @@ test('event', async () => {
   }
 
   let comp = simulate.render(mpHtml)
+  comp.setData({
+    selectable: 'force'
+  })
+  await simulate.sleep(50)
+
   comp.instance.setContent(
     `<img src="xxx">
 <img src="yyy" width="100" ignore>
-<a href="#aaa">链接1</a>
+<a href="#aaa"><img src="xxx"></a>
 <a href="https://github.com/jin-yufeng/mp-html">链接2</a>
 <a href="pages/test/test">链接3</a>
 <video src="xxx"></video>
@@ -162,6 +168,7 @@ test('event', async () => {
   await simulate.sleep(100)
 
   let node = comp.querySelector('#_root')
+  node.triggerLifeTime('attached')
   comp.instance._add({
     detail: node.instance
   })
@@ -187,9 +194,17 @@ test('event', async () => {
       }
     })
   }
+  // 模拟图片链接被点击
+  node.instance.imgTap({
+    target: {
+      dataset: {
+        i: '2_0'
+      }
+    }
+  })
   node.instance.noop()
   // 模拟图片出错
-  node.instance.mediaError({
+  let imgError = () => node.instance.mediaError({
     target: {
       dataset: {
         i: '0'
@@ -199,6 +214,10 @@ test('event', async () => {
       errMsg: 'test'
     }
   })
+  imgError()
+  comp.setData({
+    errorImg: 'xxx'
+  }, imgError)
   // 模拟链接被点击
   for (let i = 2; i <= 4; i++)
     node.instance.linkTap({

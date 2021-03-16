@@ -52,7 +52,12 @@ const config = {
     u: 'text-decoration:underline'
   }
 }
-const windowWidth = wx.getSystemInfoSync().windowWidth
+const {
+  windowWidth,
+  // #ifdef MP-WEIXIN
+  system
+  // #endif
+} = wx.getSystemInfoSync()
 const blankChar = makeMap(' ,\r,\n,\t,\f')
 let idIndex = 0
 
@@ -255,7 +260,7 @@ parser.prototype.onAttrName = function (name) {
   name = this.xml ? name : name.toLowerCase()
   if (name.substr(0, 5) == 'data-') {
     // data-src 自动转为 src
-    if (name == 'data-src')
+    if (name == 'data-src' && !this.attrs.src)
       this.attrName = 'src'
     // a 和 img 标签保留 data- 的属性，可以在 imgtap 和 linktap 事件中使用
     else if (this.tagName == 'img' || this.tagName == 'a')
@@ -361,11 +366,12 @@ parser.prototype.onOpenTag = function (selfClose) {
         if (attrs.src.includes('data:') && !attrs['original-src'])
           attrs.ignore = 'T'
         if (!attrs.ignore || node.webp || attrs.src.includes('cloud://')) {
-          let i
-          for (i = this.stack.length; i--;) {
+          for (let i = this.stack.length; i--;) {
             let item = this.stack[i]
-            if (item.name == 'a')
+            if (item.name == 'a') {
+              node.a = item.attrs
               break
+            }
             let style = item.attrs.style || ''
             if (style.includes('flex:') && !style.includes('flex:0') && !style.includes('flex: 0') && (!styleObj.width || !styleObj.width.includes('%'))) {
               styleObj.width = '100% !important'
@@ -389,35 +395,32 @@ parser.prototype.onOpenTag = function (selfClose) {
             }
             item.c = 1
           }
-          if (i == -1) {
-            node.i = this.imgList.length
-            let src = attrs['original-src'] || attrs.src
-            // #ifndef MP-ALIPAY
-            if (this.imgList.includes(src)) {
-              // 如果有重复的链接则对域名进行随机大小写变换避免预览时错位
-              let i = src.indexOf('://')
-              if (i != -1) {
-                i += 3
-                let newSrc = src.substr(0, i)
-                for (; i < src.length; i++) {
-                  if (src[i] == '/')
-                    break
-                  newSrc += Math.random() > 0.5 ? src[i].toUpperCase() : src[i]
-                }
-                newSrc += src.substr(i)
-                src = newSrc
+          node.i = this.imgList.length
+          let src = attrs['original-src'] || attrs.src
+          // #ifndef MP-ALIPAY
+          if (this.imgList.includes(src)) {
+            // 如果有重复的链接则对域名进行随机大小写变换避免预览时错位
+            let i = src.indexOf('://')
+            if (i != -1) {
+              i += 3
+              let newSrc = src.substr(0, i)
+              for (; i < src.length; i++) {
+                if (src[i] == '/')
+                  break
+                newSrc += Math.random() > 0.5 ? src[i].toUpperCase() : src[i]
               }
+              newSrc += src.substr(i)
+              src = newSrc
             }
-            // #endif
-            this.imgList.push(src)
-          } else
-            attrs.ignore = 'T'
+          }
+          // #endif
+          this.imgList.push(src)
         }
       }
       if (styleObj.display == 'inline')
         styleObj.display = ''
       if (attrs.ignore) {
-        styleObj['max-width'] = '100%'
+        styleObj['max-width'] = styleObj['max-width'] || '100%'
         attrs.style += ';-webkit-touch-callout:none'
       }
       // 设置的宽度超出屏幕，为避免变形，高度转为自动
@@ -589,8 +592,10 @@ parser.prototype.popNode = function () {
 
   Object.assign(styleObj, this.parseStyle(node))
 
-  if (parseInt(styleObj.width) > windowWidth)
+  if (parseInt(styleObj.width) > windowWidth) {
     styleObj['max-width'] = '100%'
+    styleObj['box-sizing'] = 'border-box'
+  }
 
   if (config.blockTags[node.name])
     node.name = 'div'
@@ -806,7 +811,10 @@ parser.prototype.popNode = function () {
       } else
         attrs.style += val
     }
-  attrs.style = attrs.style.substr(1) || void 0
+  attrs.style = attrs.style.substr(1)
+    // #ifndef MP-BAIDU
+    || void 0
+  // #endif
 }
 
 /**
@@ -836,6 +844,12 @@ parser.prototype.onText = function (text) {
   node.type = 'text'
   node.text = decodeEntity(text)
   if (this.hook(node)) {
+    // #ifdef MP-WEIXIN
+    if (this.options.selectable == 'force' && system.includes('iOS')) {
+      this.expose()
+      node.us = 'T'
+    }
+    // #endif
     let siblings = this.stack.length ? this.stack[this.stack.length - 1].children : this.nodes
     siblings.push(node)
   }
@@ -877,7 +891,15 @@ lexer.prototype.checkClose = function (method) {
     this.i += selfClose ? 2 : 1
     this.start = this.i
     this.handler.onOpenTag(selfClose)
-    this.state = this.text
+    if (this.handler.tagName == 'script') {
+      this.i = this.content.indexOf('</', this.i)
+      if (this.i != -1) {
+        this.i += 2
+        this.start = this.i
+      }
+      this.state = this.endTag
+    } else
+      this.state = this.text
     return true
   }
   return false

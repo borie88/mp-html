@@ -1,5 +1,5 @@
 /*!
- * mp-html v2.0.3
+ * mp-html v2.0.5
  * https://github.com/jin-yufeng/mp-html
  * 
  * Released under the MIT license
@@ -98,10 +98,10 @@ Component({
 
     /**
      * @description 是否开启长按复制
-     * @type {Boolean}
+     * @type {Boolean | String}
      * @default false
      */
-    selectable: Boolean,
+    selectable: null,
 
     /**
      * @description 是否将 title 标签的内容设置到页面标题
@@ -230,7 +230,7 @@ Component({
      * @description 获取文本内容
      * @returns {String}
      */
-    getText() {
+    getText(nodes) {
       var text = '';
       (function traversal(nodes) {
         for (var i = 0; i < nodes.length; i++) {
@@ -253,7 +253,7 @@ Component({
               text += '\t'
           }
         }
-      })(this.data.nodes)
+      })(nodes || this.data.nodes)
       return text
     },
 

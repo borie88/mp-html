@@ -85,7 +85,10 @@ function editable(vm) {
         let i = items.indexOf('换图')
         if (i != -1)
           items.splice(i, 1)
-        i = items.indexOf('设置预览图')
+        i = items.indexOf('超链接')
+        if (i != -1)
+          items.splice(i, 1)
+        i = items.indexOf('预览图')
         if (i != -1)
           items.splice(i, 1)
       }
@@ -377,6 +380,7 @@ function editable(vm) {
 
 editable.prototype.onUpdate = function (content, config) {
   if (this.vm.properties.editable) {
+    this.vm._maskTap()
     this.vm._edit = void 0
     config.entities.amp = '&'
     if (!content)

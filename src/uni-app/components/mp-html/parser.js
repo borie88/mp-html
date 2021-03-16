@@ -54,7 +54,12 @@ const config = {
     // #endif
   }
 }
-const windowWidth = uni.getSystemInfoSync().windowWidth
+const {
+  windowWidth,
+  // #ifdef MP-WEIXIN
+  system
+  // #endif
+} = uni.getSystemInfoSync()
 const blankChar = makeMap(' ,\r,\n,\t,\f')
 let idIndex = 0
 
@@ -266,7 +271,7 @@ parser.prototype.onAttrName = function (name) {
   name = this.xml ? name : name.toLowerCase()
   if (name.substr(0, 5) == 'data-') {
     // data-src 自动转为 src
-    if (name == 'data-src')
+    if (name == 'data-src' && !this.attrs.src)
       this.attrName = 'src'
     // a 和 img 标签保留 data- 的属性，可以在 imgtap 和 linktap 事件中使用
     else if (this.tagName == 'img' || this.tagName == 'a')
@@ -307,6 +312,9 @@ parser.prototype.onOpenTag = function (selfClose) {
   let node = Object.create(null)
   node.name = this.tagName
   node.attrs = this.attrs
+  // 避免因为自动 diff 使得 type 被设置为 null 导致部分内容不显示
+  if (this.options.nodes.length)
+    node.type = 'node'
   this.attrs = Object.create(null)
 
   let attrs = node.attrs,
@@ -378,11 +386,12 @@ parser.prototype.onOpenTag = function (selfClose) {
         if (attrs.src.includes('data:') && !attrs['original-src'])
           attrs.ignore = 'T'
         if (!attrs.ignore || node.webp || attrs.src.includes('cloud://')) {
-          let i
-          for (i = this.stack.length; i--;) {
+          for (let i = this.stack.length; i--;) {
             let item = this.stack[i]
-            if (item.name == 'a')
+            if (item.name == 'a') {
+              node.a = item.attrs
               break
+            }
             // #ifndef H5 || APP-PLUS
             let style = item.attrs.style || ''
             if (style.includes('flex:') && !style.includes('flex:0') && !style.includes('flex: 0') && (!styleObj.width || !styleObj.width.includes('%'))) {
@@ -408,42 +417,39 @@ parser.prototype.onOpenTag = function (selfClose) {
             // #endif
             item.c = 1
           }
-          if (i == -1) {
-            attrs.i = this.imgList.length.toString()
-            let src = attrs['original-src'] || attrs.src
-            // #ifndef H5 || MP-ALIPAY || APP-PLUS || MP-360
-            if (this.imgList.includes(src)) {
-              // 如果有重复的链接则对域名进行随机大小写变换避免预览时错位
-              let i = src.indexOf('://')
-              if (i != -1) {
-                i += 3
-                let newSrc = src.substr(0, i)
-                for (; i < src.length; i++) {
-                  if (src[i] == '/')
-                    break
-                  newSrc += Math.random() > 0.5 ? src[i].toUpperCase() : src[i]
-                }
-                newSrc += src.substr(i)
-                src = newSrc
+          attrs.i = this.imgList.length.toString()
+          let src = attrs['original-src'] || attrs.src
+          // #ifndef H5 || MP-ALIPAY || APP-PLUS || MP-360
+          if (this.imgList.includes(src)) {
+            // 如果有重复的链接则对域名进行随机大小写变换避免预览时错位
+            let i = src.indexOf('://')
+            if (i != -1) {
+              i += 3
+              let newSrc = src.substr(0, i)
+              for (; i < src.length; i++) {
+                if (src[i] == '/')
+                  break
+                newSrc += Math.random() > 0.5 ? src[i].toUpperCase() : src[i]
               }
+              newSrc += src.substr(i)
+              src = newSrc
             }
-            // #endif
-            this.imgList.push(src)
-            // #ifdef H5 || APP-PLUS
-            if (this.options.lazyLoad) {
-              attrs['data-src'] = attrs.src
-              attrs.src = void 0
-            }
-            // #endif
-          } else
-            attrs.ignore = 'T'
+          }
+          // #endif
+          this.imgList.push(src)
+          // #ifdef H5 || APP-PLUS
+          if (this.options.lazyLoad) {
+            attrs['data-src'] = attrs.src
+            attrs.src = void 0
+          }
+          // #endif
         }
       }
       if (styleObj.display == 'inline')
         styleObj.display = ''
       // #ifndef APP-PLUS-NVUE
       if (attrs.ignore) {
-        styleObj['max-width'] = '100%'
+        styleObj['max-width'] = styleObj['max-width'] || '100%'
         attrs.style += ';-webkit-touch-callout:none'
       }
       // #endif
@@ -616,8 +622,10 @@ parser.prototype.popNode = function () {
 
   Object.assign(styleObj, this.parseStyle(node))
 
-  if (parseInt(styleObj.width) > windowWidth)
+  if (parseInt(styleObj.width) > windowWidth) {
     styleObj['max-width'] = '100%'
+    styleObj['box-sizing'] = 'border-box'
+  }
 
   // #ifndef APP-PLUS-NVUE
   if (config.blockTags[node.name])
@@ -891,6 +899,12 @@ parser.prototype.onText = function (text) {
   node.type = 'text'
   node.text = decodeEntity(text)
   if (this.hook(node)) {
+    // #ifdef MP-WEIXIN
+    if (this.options.selectable == 'force' && system.includes('iOS')) {
+      this.expose()
+      node.us = 'T'
+    }
+    // #endif
     let siblings = this.stack.length ? this.stack[this.stack.length - 1].children : this.nodes
     siblings.push(node)
   }
@@ -932,7 +946,15 @@ lexer.prototype.checkClose = function (method) {
     this.i += selfClose ? 2 : 1
     this.start = this.i
     this.handler.onOpenTag(selfClose)
-    this.state = this.text
+    if (this.handler.tagName == 'script') {
+      this.i = this.content.indexOf('</', this.i)
+      if (this.i != -1) {
+        this.i += 2
+        this.start = this.i
+      }
+      this.state = this.endTag
+    } else
+      this.state = this.text
     return true
   }
   return false

@@ -217,26 +217,25 @@
   ![支持](https://gitee.com/jin-yufeng/mp-html/raw/master/docs/assets/sponsor.png)   
 
 ## 更新日志
-- v2.0.3 (20210115)
-  1. `U` 图片被点击时不冒泡（可以与整体的点击区分开，不影响链接中的图片）
-  2. `F` 修复了图片链接缺省协议名时可能无法预览的问题
-  3. `F` 修复了原生包 `video` 和 `audio` 标签内放置文本会报错的问题
-  4. `F` 修复了 `editable` 插件清空内容时弹窗可能不消失的问题
-  5. `F` 修复了 `highlight` 插件部分情况下样式不正确的问题 [详细](https://github.com/jin-yufeng/mp-html/issues/231)
-  6. `F` 修复了文档首页跳转到快速开始页时 `404` 的问题 by [@AnsonZnl](https://github.com/AnsonZnl)
+- v2.0.5 (20210312)
+  1. `U` [linktap](https://jin-yufeng.gitee.io/mp-html/#/basic/event#linktap) 事件增加返回内部文本内容 `innerText` [详细](https://github.com/jin-yufeng/mp-html/issues/271)
+  2. `U` [selectable](https://jin-yufeng.gitee.io/mp-html/#/basic/prop#selectable) 属性设置为 `force` 时能够在微信 `iOS` 端生效（文本块会变成 `inline-block`） [详细](https://github.com/jin-yufeng/mp-html/issues/267)
+  3. `F` 修复了部分情况下竖向无法滚动的问题 [详细](https://github.com/jin-yufeng/mp-html/issues/182)
+  4. `F` 修复了 `uni-app` 包多次修改富文本数据时部分内容可能不显示的问题
+  5. `F` 修复了百度小程序真机部分内容不显示的问题 [详细](https://github.com/jin-yufeng/mp-html/issues/272)
+  6. `F` 修复了 [腾讯视频](https://jin-yufeng.gitee.io/mp-html/#/advanced/plugin#txv-video) 插件可能无法播放的问题 [详细](https://github.com/jin-yufeng/mp-html/issues/265)
+  7. `F` 修复了 [highlight](https://jin-yufeng.gitee.io/mp-html/#/advanced/plugin#highlight) 插件没有设置高亮语言时没有应用默认样式的问题 [详细](https://github.com/jin-yufeng/mp-html/issues/276) by [@fuzui](https://github.com/fuzui)
 
-- v2.0.2 (20210108)
-  1. `U` `uni-app` 包微信端利用 `virtualHost` 去除夹层，加快渲染
-  2. `F` 修复了部分情况下 `flex` 布局显示不正确的问题
-  3. `F` 修复了设置 `loading-img` 会导致懒加载失效的问题
-  4. `F` 修复了头条原生包部分情况下表格显示不正确的问题
-  5. `F` 修复了 `uni-app` 的 `h5` 和 `app` 端部分插件样式无法应用的问题
-  6. `F` 修复了 `uni-app` 包没有自动将 `data-src` 设置为 `src` 的问题
-  7. `F` 修复了 `uni-app` 包的 `nvue` 端 `getRect` 方法无法使用的问题
-  8. `F` 修复了 `uni-app` 包运行到华为快应用可能报错的问题
-  9. `F` 修复了在低版本 taro 中使用可能无法正确解析的问题 [详细](https://github.com/jin-yufeng/mp-html/issues/248)
-  10. `F` 修复了 `highlight` 插件 `pre` 和 `code` 之间有空白符时无法高亮的问题
-  11. `F` 修复了 `editable` 插件清空内容后插入可能报错的问题
+- v2.0.4 (20210131)
+  1. `A` [editable](https://jin-yufeng.gitee.io/mp-html/#/advanced/plugin#editable) 插件增加下划线和图片超链接的功能 [详细](https://github.com/jin-yufeng/mp-html/issues/254)  
+  2. `U` 支付宝和头条小程序原生包直接通过 `template` 递归实现渲染
+  3. `F` 修复了 `img` 标签设置 `data-src` 可能导致图片不显示的问题 [详细](https://github.com/jin-yufeng/mp-html/issues/257)
+  4. `F` 修复了 `script` 标签中的 `<` 会被解析为标签的问题 [详细](https://github.com/jin-yufeng/mp-html/issues/259)
+  5. `F` 修复了 `uni-app` 包的 `app` 端播放视频时可能高度突然变小的问题
+  6. `F` 修复了 `uni-app` 包的 `app` 端长按图片会报错的问题
+  7. `F` 修复了 `uni-app` 包的 `nvue` 端使用 [editable](https://jin-yufeng.gitee.io/mp-html/#/advanced/plugin#editable) 插件后无法显示的问题
+  8. `F` 修复了 [editable](https://jin-yufeng.gitee.io/mp-html/#/advanced/plugin#editable) 插件删除图片和切换内容时可能出现错误选择框的问题
+  9. `F` 修复了 [editable](https://jin-yufeng.gitee.io/mp-html/#/advanced/plugin#editable) 插件无法编辑链接文本内容的问题
 
   从 `1.x` 的升级方法可见 [更新指南](https://jin-yufeng.gitee.io/mp-html/#/changelog/changelog?id=v200)
 
