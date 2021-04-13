@@ -49,9 +49,11 @@ const config = {
     pre: 'font-family:monospace;white-space:pre',
     s: 'text-decoration:line-through',
     small: 'display:inline;font-size:0.8em',
+    strike: 'text-decoration:line-through',
     u: 'text-decoration:underline'
   }
 }
+const tagSelector = {}
 const {
   windowWidth,
   // #ifdef MP-WEIXIN
@@ -248,7 +250,7 @@ parser.prototype.parseStyle = function (node) {
 parser.prototype.onTagName = function (name) {
   this.tagName = this.xml ? name : name.toLowerCase()
   if (this.tagName == 'svg')
-    this.xml = true // svg 标签内大小写敏感
+    this.xml = (this.xml || 0) + 1 // svg 标签内大小写敏感
 }
 
 /**
@@ -309,6 +311,10 @@ parser.prototype.onOpenTag = function (selfClose) {
     parent = this.stack[this.stack.length - 1],
     siblings = parent ? parent.children : this.nodes,
     close = this.xml ? selfClose : config.voidTags[node.name]
+
+  // 替换标签名选择器
+  if (tagSelector[node.name])
+    attrs.class = tagSelector[node.name] + (attrs.class ? ' ' + attrs.class : '')
 
   // 转换 embed 标签
   if (node.name == 'embed') {
@@ -475,7 +481,10 @@ parser.prototype.onCloseTag = function (name) {
     let siblings = this.stack.length ? this.stack[this.stack.length - 1].children : this.nodes
     siblings.push({
       name,
-      attrs: {}
+      attrs: {
+        class: tagSelector[name],
+        style: this.tagStyle[name]
+      }
     })
   }
 }
@@ -517,12 +526,16 @@ parser.prototype.popNode = function () {
 
   // 转换 svg
   if (node.name == 'svg') {
+    if (this.xml > 1)
+      return this.xml-- // 多层 svg 嵌套
     let src = '', style = attrs.style
     attrs.style = ''
     if (attrs.viewbox)
       attrs.viewBox = attrs.viewbox
     attrs.xmlns = 'http://www.w3.org/2000/svg';
     (function traversal(node) {
+      if (node.type == 'text')
+        return src += node.text
       src += '<' + node.name
       for (let item in node.attrs) {
         let val = node.attrs[item]

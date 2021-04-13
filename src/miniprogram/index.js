@@ -1,5 +1,5 @@
 /*!
- * mp-html v2.0.5
+ * mp-html v2.1.1
  * https://github.com/jin-yufeng/mp-html
  * 
  * Released under the MIT license
@@ -13,6 +13,12 @@ Component({
     nodes: []
   },
   properties: {
+    /**
+     * @description 容器的样式
+     * @type {String}
+     */
+    containerStyle: String,
+    
     /**
      * @description 用于渲染的 html 字符串
      * @type {String}

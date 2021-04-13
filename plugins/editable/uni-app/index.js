@@ -2,6 +2,7 @@
  * @fileoverview editable 插件
  */
 const config = require('./config')
+const parser = require('../parser')
 
 function editable(vm) {
   this.vm = vm
@@ -171,6 +172,16 @@ function editable(vm) {
   }
 
   /**
+   * @description 在光标处插入指定 html 内容
+   * @param {String} html 内容
+   */
+   vm.insertHtml = function (html) {
+    var arr = new parser(vm).parse(html)
+    for (var i = 0; i < arr.length; i++)
+      insert(arr[i])
+  }
+
+  /**
    * @description 在光标处插入一张图片
    */
   vm.insertImg = function () {
@@ -255,7 +266,7 @@ function editable(vm) {
       attrs: {},
       children: [{
         type: 'text',
-        text: '新段落'
+        text: ''
       }]
     })
   }
@@ -271,7 +282,7 @@ function editable(vm) {
       attrs: {},
       children: [{
         type: 'text',
-        text: '开始'
+        text: ''
       }]
     }])
   }
@@ -385,7 +396,16 @@ editable.prototype.onUpdate = function (content, config) {
     this.vm._edit = void 0
     config.entities.amp = '&'
     if (!content)
-      return '<p>开始</p>'
+      setTimeout(() => {
+        this.vm.$set(this.vm, 'nodes', [{
+          name: 'p',
+          attrs: {},
+          children: [{
+            type: 'text',
+            text: ''
+          }]
+        }])
+      }, 0)
   }
 }
 

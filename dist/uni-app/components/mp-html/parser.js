@@ -46,10 +46,12 @@ var config = {
     pre: 'font-family:monospace;white-space:pre',
     s: 'text-decoration:line-through',
     small: 'display:inline;font-size:0.8em',
+    strike: 'text-decoration:line-through',
     u: 'text-decoration:underline' // #endif
 
   }
 };
+var tagSelector = {};
 
 var _uni$getSystemInfoSyn = uni.getSystemInfoSync(),
     windowWidth = _uni$getSystemInfoSyn.windowWidth,
@@ -316,7 +318,9 @@ parser.prototype.onOpenTag = function (selfClose) {
   var attrs = node.attrs,
       parent = this.stack[this.stack.length - 1],
       siblings = parent ? parent.children : this.nodes,
-      close = this.xml ? selfClose : config.voidTags[node.name]; // 转换 embed 标签
+      close = this.xml ? selfClose : config.voidTags[node.name]; // 替换标签名选择器
+
+  if (tagSelector[node.name]) attrs["class"] = tagSelector[node.name] + (attrs["class"] ? ' ' + attrs["class"] : ''); // 转换 embed 标签
 
   if (node.name == 'embed') {
     // #ifndef H5 || APP-PLUS
@@ -506,7 +510,10 @@ parser.prototype.onCloseTag = function (name) {
     var siblings = this.stack.length ? this.stack[this.stack.length - 1].children : this.nodes;
     siblings.push({
       name: name,
-      attrs: {}
+      attrs: {
+        "class": tagSelector[name],
+        style: this.tagStyle[name]
+      }
     });
   }
 };
@@ -551,6 +558,7 @@ parser.prototype.popNode = function () {
     attrs.xmlns = 'http://www.w3.org/2000/svg';
 
     (function traversal(node) {
+      if (node.type == 'text') return src += node.text;
       src += '<' + node.name;
 
       for (var item in node.attrs) {
