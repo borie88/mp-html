@@ -1,1 +1,1 @@
-{"component":true,"usingComponents":{"node":"./node"}}
+{"component":true,"usingComponents":{"txv-video":"plugin://tencentvideo/video","node":"./node"}}

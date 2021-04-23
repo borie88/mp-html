@@ -191,8 +191,8 @@ parser.prototype.parseStyle = function (node) {
     // 暴露锚点
     if (this.options.useAnchor)
       this.expose()
-    else if (node.name != 'img' && node.name != 'a' && node.name != 'video' && node.name != 'audio')
-      attrs.id = void 0
+    // else if (node.name != 'img' && node.name != 'a' && node.name != 'video' && node.name != 'audio')
+    //   attrs.id = void 0
   }
 
   // 转换 width 和 height 属性
@@ -211,6 +211,12 @@ parser.prototype.parseStyle = function (node) {
       continue
     var key = info.shift().trim().toLowerCase(),
       value = info.join(':').trim()
+    // add img kids
+    if (node.name === 'img' && key === 'content' && value.includes('--kid')) {
+      const kidStr = value.replace(/--|var|\)|\(/g, '')
+      node.attrs.class = node.attrs.class ? node.attrs.class + ` ${kidStr}` : kidStr
+      node.attrs['data-kid'] = kidStr.replace('kid-', '')
+    }
     // 兼容性的 css 不压缩
     if ((value[0] == '-' && value.lastIndexOf('-') > 0) || value.includes('safe'))
       tmp += `;${key}:${value}`
@@ -260,6 +266,8 @@ parser.prototype.onAttrName = function (name) {
       this.attrName = 'src'
     // a 和 img 标签保留 data- 的属性，可以在 imgtap 和 linktap 事件中使用
     else if (this.tagName == 'img' || this.tagName == 'a')
+      this.attrName = name
+    else if (name === 'data-kid')
       this.attrName = name
     // 剩余的移除以减小大小
     else
@@ -371,7 +379,7 @@ parser.prototype.onOpenTag = function (selfClose) {
               break
             }
             let style = item.attrs.style || ''
-            if (style.includes('flex:') && !style.includes('flex:0') && !style.includes('flex: 0') && (!styleObj.width || !styleObj.width.includes('%'))) {
+            if (style.includes('flex:') && !style.includes('flex:0') && !style.includes('flex: 0') && !styleObj.width/* (!styleObj.width || !styleObj.width.includes('%')) */) {
               styleObj.width = '100% !important'
               styleObj.height = ''
               for (let j = i + 1; j < this.stack.length; j++)
@@ -511,6 +519,11 @@ parser.prototype.popNode = function () {
         this.pre = true
   }
 
+  if (node.attrs['data-kid']) {
+    const kidStr = `kid-${node.attrs['data-kid']}`
+    node.attrs.class = node.attrs.class ? node.attrs.class + ` ${kidStr}` : kidStr
+  }
+
   // 转换 svg
   if (node.name == 'svg') {
     if (this.xml > 1)
@@ -592,7 +605,7 @@ parser.prototype.popNode = function () {
 
   Object.assign(styleObj, this.parseStyle(node))
 
-  if (parseInt(styleObj.width) > windowWidth) {
+  if (parseInt(styleObj.width) > windowWidth && !(styleObj.width.includes('%')) && parseInt(styleObj.width) > 100) {
     styleObj['max-width'] = '100%'
     styleObj['box-sizing'] = 'border-box'
   }
@@ -603,7 +616,7 @@ parser.prototype.popNode = function () {
   else if (!config.trustTags[node.name] && !this.xml)
     node.name = 'span'
 
-  else if (node.name == 'a' || node.name == 'ad')
+  else if (node.name == 'a' || node.name == 'ad' || node.attrs['data-kid'])
     this.expose()
 
   else if (node.name == 'video' || node.name == 'audio')
@@ -792,6 +805,18 @@ parser.prototype.popNode = function () {
         item.f = void 0
       }
     }
+
+  if (
+    (styleObj['overflow-x'] && (styleObj['overflow-x'] === 'scroll' || styleObj['overflow-x'] === 'auto'))
+    || (styleObj['overflow-y'] && (styleObj['overflow-y'] === 'scroll' || styleObj['overflow-x'] === 'auto'))
+  ) {
+    node.name = 'scroll-view'
+    if (styleObj['overflow-x']) {
+      node.attrs.scrolldir = 'x'
+    } else {
+      node.attrs.scrolldir = 'y'
+    }
+  }
 
   // flex 布局时部分样式需要提取到 rich-text 外层
   let flex = parent && (parent.attrs.style || '').includes('flex') && !node.c
