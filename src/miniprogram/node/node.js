@@ -72,7 +72,11 @@ Component({
         return this.linkTap(node.a)
       if (node.attrs.ignore)
         return
-      this.root.triggerEvent('imgtap', node.attrs)
+      const { x, y } = e.detail
+      this.root.triggerEvent('imgtap', Object.assign(node.attrs, {
+        x,
+        y
+      }))
       if (this.root.properties.previewImg) {
         var current =
           // #ifndef MP-ALIPAY
@@ -98,7 +102,11 @@ Component({
       // 父级中有链接
       if (node.attrs.ignore)
         return
-      this.root.triggerEvent('imglongpress', node.attrs)
+      const { x, y } = e.detail
+      this.root.triggerEvent('imglongpress', Object.assign(node.attrs, {
+        x,
+        y
+      }))
     },
 
     /**
