@@ -140,7 +140,14 @@ Component({
      * @type {Boolean | Number}
      * @default false
      */
-    useAnchor: null
+    useAnchor: null,
+
+    /**
+     * @description 是否强制image mode='widthFix'（默认若图片设置高度，mode为空）
+     * @type {Boolean}
+     * @default false
+     */
+     forceWidthFix: Boolean,
   },
 
   created() {

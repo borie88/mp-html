@@ -7,7 +7,7 @@ Component({
   },
   properties: {
     childs: Array,  // 子节点列表
-    opts: Array     // 设置 [是否开启懒加载, 加载中占位图, 错误占位图, 是否使用长按菜单]
+    opts: Array     // 设置 [是否开启懒加载, 加载中占位图, 错误占位图, 是否使用长按菜单, 强制mode widthFix]
   },
   // #ifndef MP-TOUTIAO
   attached() {
@@ -94,8 +94,15 @@ Component({
      * @param {Event} e 
      */
     imgLoad(e) {
-      var i = e.target.dataset.i,
-        node = this.getNode(i), val
+      const i = e.target.dataset.i
+      // const width = e.detail.width || 0
+      // const height = e.detail.height || 0
+      // const ratio = width / height
+      // this.setData({
+      //   [`whwh.${i}`]: { w: width, h: height, r: ratio }
+      // })
+      const node = this.getNode(i)
+      let val
       if (!node.w)
         val = e.detail.width
       // 加载完毕，取消加载中占位图

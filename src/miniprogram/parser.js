@@ -379,7 +379,7 @@ parser.prototype.onOpenTag = function (selfClose) {
               break
             }
             let style = item.attrs.style || ''
-            if (style.includes('flex:') && !style.includes('flex:0') && !style.includes('flex: 0') && (!styleObj.width || !styleObj.width.includes('%'))) {
+            if (style.includes('flex:') && !style.includes('flex:0') && !style.includes('flex: 0') && !styleObj.width/* (!styleObj.width || !styleObj.width.includes('%')) */) {
               styleObj.width = '100% !important'
               styleObj.height = ''
               for (let j = i + 1; j < this.stack.length; j++)
@@ -605,7 +605,7 @@ parser.prototype.popNode = function () {
 
   Object.assign(styleObj, this.parseStyle(node))
 
-  if (parseInt(styleObj.width) > windowWidth) {
+  if (parseInt(styleObj.width) > windowWidth && !(styleObj.width.includes('%')) && parseInt(styleObj.width) > 100) {
     styleObj['max-width'] = '100%'
     styleObj['box-sizing'] = 'border-box'
   }
@@ -805,6 +805,18 @@ parser.prototype.popNode = function () {
         item.f = void 0
       }
     }
+
+  if (
+    (styleObj['overflow-x'] && (styleObj['overflow-x'] === 'scroll' || styleObj['overflow-x'] === 'auto'))
+    || (styleObj['overflow-y'] && (styleObj['overflow-y'] === 'scroll' || styleObj['overflow-x'] === 'auto'))
+  ) {
+    node.name = 'scroll-view'
+    if (styleObj['overflow-x']) {
+      node.attrs.scrolldir = 'x'
+    } else {
+      node.attrs.scrolldir = 'y'
+    }
+  }
 
   // flex 布局时部分样式需要提取到 rich-text 外层
   let flex = parent && (parent.attrs.style || '').includes('flex') && !node.c

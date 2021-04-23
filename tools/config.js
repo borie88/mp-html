@@ -14,7 +14,7 @@ module.exports = {
     // 'markdown',  // 解析 md
     // 'search',    // 关键词搜索
     // 'style',     // 解析 style 标签
-    // 'txv-video'  // 使用腾讯视频
+    'txv-video'  // 使用腾讯视频
   ],
 
   /**
