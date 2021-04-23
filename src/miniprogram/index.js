@@ -147,7 +147,7 @@ Component({
      * @type {Boolean}
      * @default false
      */
-     forceWidthFix: Boolean,
+     forceWidthFix: Boolean
   },
 
   created() {

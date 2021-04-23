@@ -90,6 +90,18 @@ Component({
     },
 
     /**
+     * @description 图片长按事件
+     * @param {Event} e 
+     */
+     imgLongPress(e) {
+      var node = this.getNode(e.target.dataset.i)
+      // 父级中有链接
+      if (node.attrs.ignore)
+        return
+      this.root.triggerEvent('imglongpress', node.attrs)
+    },
+
+    /**
      * @description 图片加载完成事件
      * @param {Event} e 
      */
