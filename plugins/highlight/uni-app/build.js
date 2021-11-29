@@ -2,28 +2,29 @@ const config = require('../config')
 
 const build = {
   import: 'prism.css',
-  handler(file) {
+  handler (file) {
     if (file.path.includes('prism.css')) {
       // 将标签名选择器和属性选择器转为 class 选择器（组件内仅支持 class 选择器）
-      file.contents = Buffer.from(file.contents.toString().replace(/pre([[)])/g, '.hl-pre$1').replace(/code/g, '.hl-code').replace(/\[class\*="language-"\]/g, '').replace(/:not[^,}]+[,}]*/g, '').replace(/\.token\./g, '.hl-').replace(/\.[a-z]/g, '/deep/ $&'))
+      file.contents = Buffer.from(file.contents.toString().replace(/pre([[)])/g, '.hl-pre$1').replace(/code/g, '.hl-code').replace(/\[class\*="?language-"?\]/g, '').replace(/:not[^,}]+[,}]*/g, '').replace(/\.token\./g, '.hl-'))
     }
   }
 }
 
-if (config.showLanguageName || config.showLineNumber)
+if (config.showLanguageName || config.showLineNumber) {
   // pre 内部的 code 进行滚动，避免行号和语言名称跟随滚动
-  build.style = `/deep/ .hl-pre {
+  build.style = `.hl-pre {
   position: relative;
 }
-/deep/ .hl-code {
+.hl-code {
   overflow: auto;
   display: block;
 }`
+}
 
 if (config.copyByLongPress) {
-  build.template = `<rich-text v-if="n.attrs['data-content']" :nodes="[n]" :data-content="n.attrs['data-content']" :data-lang="n.attrs['data-lang']" @longpress="copyCode" />`
+  build.template = '<rich-text v-if="n.attrs[\'data-content\']" :nodes="[n]" :data-content="n.attrs[\'data-content\']" :data-lang="n.attrs[\'data-lang\']" @longpress="copyCode" />'
   build.methods = {
-    copyCode(e) {
+    copyCode (e) {
       uni.showActionSheet({
         itemList: ['复制代码'],
         success: () =>
@@ -37,7 +38,7 @@ if (config.copyByLongPress) {
 
 if (config.showLanguageName) {
   build.style = (build.style || '') +
-    `/deep/ .hl-language {
+    `.hl-language {
   font-size: 12px;
   font-weight: 600;
   position: absolute;
@@ -45,19 +46,19 @@ if (config.showLanguageName) {
   text-align: right;
   top: 3px;
 }
-/deep/ .hl-pre {
+.hl-pre {
   padding-top: 1.5em;
 }`
 }
 
 if (config.showLineNumber) {
   build.style = (build.style || '') +
-    `/deep/ .hl-pre {
+    `.hl-pre {
   font-size: 14px;
   padding-left: 3.8em;
   counter-reset: linenumber;
 }
-/deep/ .line-numbers-rows {
+.line-numbers-rows {
   position: absolute;
   pointer-events: none;
   top: ${config.showLanguageName ? 1.5 : 1}em;
@@ -71,11 +72,11 @@ if (config.showLineNumber) {
   -ms-user-select: none;
   user-select: none;
 }
-/deep/ .line-numbers-rows .span {
+.line-numbers-rows .span {
   display: block;
   counter-increment: linenumber;
 } 
-/deep/ .line-numbers-rows .span:before {
+.line-numbers-rows .span:before {
   content: counter(linenumber);
   color: #999;
   display: block;

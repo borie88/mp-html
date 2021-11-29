@@ -13,7 +13,7 @@
   <script>
     export default {
       methods: {
-        ready(e) {
+        ready (e) {
           console.log(e)
         }
       }
@@ -29,7 +29,7 @@
   ```
   ```javascript
   Page({
-    ready(e) {
+    ready (e) {
       console.log(e)
     }
   })
@@ -43,7 +43,7 @@
   ```
   ```javascript
   Page({
-    ready(e) {
+    ready (e) {
       console.log(e.detail)
     }
   })
@@ -63,7 +63,7 @@
 
 ## error
 触发时机：发生渲染错误时  
-返回值：一个 *object*，其中 *source* 为错误来源（包括 *img*、*video*、*audio*、*ad*），*attrs* 为该标签的属性列表（包含 *src* 等信息），*errMsg* 是错误信息  
+返回值：一个 *object*，其中 *source* 为错误来源（包括 *img*、*video*、*audio*），*attrs* 为该标签的属性列表（包含 *src* 等信息），*errMsg* 是错误信息  
 用途：收集错误信息，减少使用出错率高的链接  
 
 ## imgtap
@@ -75,7 +75,7 @@
 示例：  
 ```javascript
 Page({
-  imgtap(e) {
+  imgtap (e) {
     // 对做了某种标记的图片进行预览
     if (e.detail['data-flag']) {
       wx.previewImage({
@@ -109,18 +109,18 @@ Page({
 示例：  
 ```javascript
 Page({
-  linktap(e) {
-    // 下载 doc 文件
-    if (e.detail.href.includes('.doc'))
+  linktap (e) {
+    if (e.detail.href.includes('.doc')) {
+      // 下载 doc 文件
       wx.downloadFile({
         url: e.detail.href,
-        success(res) {
+        success (res) {
           wx.hideLoading()
           wx.openDocument({
             filePath: res.tempFilePath
           })
         },
-        fail(err) {
+        fail (err) {
           wx.hideLoading()
           wx.showModal({
             title: '失败',
@@ -129,16 +129,17 @@ Page({
           })
         }
       })
-    // 跳转到 webview
-    else if (e.detail.href.includes('xxx.com'))
+    } else if (e.detail.href.includes('xxx.com')) {
+      // 跳转到 webview
       wx.navigateTo({
         url: 'pages/webview/webview?url=' + e.detail.href,
       })
-    // 跳转其他小程序
-    else if (e.detail['data-appid'])
+    } else if (e.detail['data-appid']) {
+      // 跳转其他小程序
       wx.navigateToMiniProgram({
         appId: e.detail['data-appid']
       })
+    }
   }
 })
 ```

@@ -4,7 +4,7 @@
 const path = require('path')
 const simulate = require('miniprogram-simulate')
 
-const html = require('./content')                        // 测试 html
+const html = require('./content') // 测试 html
 const dist = '../dev/mp-weixin/components/mp-html/index' // 组件目录
 
 const mpHtml = simulate.load(path.resolve(__dirname, dist), 'mp-html')
@@ -12,8 +12,9 @@ const mpHtml = simulate.load(path.resolve(__dirname, dist), 'mp-html')
 // 渲染测试
 test('render', async () => {
   // 创建和渲染页面
-  let id = simulate.load({
+  const id = simulate.load({
     data: {
+      containerStyle: '',
       copyLink: true,
       pauseVideo: true,
       previewImg: true,
@@ -21,13 +22,13 @@ test('render', async () => {
     },
     template:
       `<scroll-view id="scroll" style="height:100px" scroll-y scroll-top="{{top}}">
-  <mp-html id="article" content="{{html}}" domain="https://6874-html-foe72-1259071903.tcb.qcloud.la/demo" copy-link="{{copyLink}}" loading-img="xxx" error-img="xxx" lazy-load pause-video="{{pauseVideo}}" preview-img="{{previewImg}}" scroll-table use-anchor="{{useAnchor}}">加载中...</mp-html>
+  <mp-html id="article" container-style="{{containerStyle}}" content="{{html}}" domain="https://6874-html-foe72-1259071903.tcb.qcloud.la/demo" copy-link="{{copyLink}}" loading-img="xxx" error-img="xxx" lazy-load pause-video="{{pauseVideo}}" preview-img="{{previewImg}}" scroll-table use-anchor="{{useAnchor}}">加载中...</mp-html>
 </scroll-view>`,
     usingComponents: {
       'mp-html': mpHtml
     }
   })
-  let page = simulate.render(id)
+  const page = simulate.render(id)
 
   // 设置数据
   page.setData({
@@ -38,7 +39,6 @@ test('render', async () => {
   // api 测试
   const comp = page.querySelector('#article')
   expect(comp.dom.tagName).toBe('MP-HTML')
-
 
   await simulate.sleep(50)
 
@@ -94,19 +94,19 @@ console.log('11')
   </div>
 </div>
 <img style="width:auto" src="data:image/png;base64,xxxx">
-<img src="yyy.webp" style="width:1000px" height="200" ignore>
+<img src="xxx" style="width:20px" height="10">
+<img src="yyy.webp" style="width:1000px" ignore>
 <svg />
-<svg viewbox="0 0 1 1"><text>123</text></svg>
+<svg viewbox="0 0 1 1"><text>123</text><svg></svg></svg>
 <div class="ql-align-center" style="background-image:url(&quot;/xxx.jpg?a=2&amp;b=3&quot;)"></div>
 <![CDATA[<]]>
 <!-- 测试 flex 布局、未闭合标签、data- 属性处理 -->
-<div style="display:flex">
-  <div style="flex:1">123</div>
+<div style="display:flex;width:1000px">
+  <div style="flex:1" dir="rtl">123</div>
 </div>
 </br><div data-test="xxx" style="display:flex;display:-webkit-flex;"><div>
   <img data-src="/xxx.jpg" style="width:100%;height:100px">  `, true) // 补充测试
-  let text = comp.instance.getText()
-  expect(text.includes('更多')).toBe(true) // 检查上方的实体是否被解码
+  expect(comp.instance.getText().includes('更多')).toBe(true) // 检查上方的实体是否被解码
   await comp.instance.getRect()
 
   await comp.instance.navigateTo('anchor') // 基于页面跳转
@@ -122,6 +122,13 @@ console.log('11')
   try {
     await comp.instance.navigateTo('anchor') // 禁用锚点的情况下跳转
   } catch (e) { }
+
+  page.setData({
+    containerStyle: 'white-space:pre-wrap'
+  })
+  await simulate.sleep(50)
+  comp.instance.setContent('  空格\n换行')
+  expect(comp.instance.getText().includes('\n')).toBe(true) // 检查换行是否被保留
 
   await simulate.sleep(50) // 等待异步 api 执行完毕
 
@@ -141,26 +148,29 @@ test('event', async () => {
   // 测试失败回调
   wx.navigateTo = function (obj) {
     setTimeout(() => {
-      if (typeof obj.fail == 'function')
+      if (typeof obj.fail === 'function') {
         obj.fail()
+      }
     }, 0)
   }
   wx.switchTab = function (obj) {
     setTimeout(() => {
-      if (typeof obj.fail == 'function')
+      if (typeof obj.fail === 'function') {
         obj.fail()
+      }
     }, 0)
   }
 
-  let comp = simulate.render(mpHtml)
+  const comp = simulate.render(mpHtml)
   comp.setData({
-    selectable: 'force'
+    selectable: 'force',
+    loadingImg: 'xxx'
   })
   await simulate.sleep(50)
 
   comp.instance.setContent(
     `<img src="xxx">
-<img src="yyy" width="100" ignore>
+<img src="yyy" width="100" height="50" ignore>
 <a href="#aaa"><img src="xxx"></a>
 <a href="https://github.com/jin-yufeng/mp-html">链接2</a>
 <a href="pages/test/test">链接3</a>
@@ -173,7 +183,7 @@ test('event', async () => {
 
   await simulate.sleep(100)
 
-  let node = comp.querySelector('#_root')
+  const node = comp.querySelector('#_root')
   node.triggerLifeTime('attached')
   comp.instance._add({
     detail: node.instance
@@ -200,6 +210,18 @@ test('event', async () => {
       }
     })
   }
+  comp.setData({
+    loadingImg: ''
+  })
+  await simulate.sleep(50)
+  node.instance.imgLoad({
+    target: {
+      dataset: {
+        i: '1'
+      }
+    }
+  })
+
   // 模拟图片链接被点击
   node.instance.imgTap({
     target: {
@@ -210,7 +232,7 @@ test('event', async () => {
   })
   node.instance.noop()
   // 模拟图片出错
-  let imgError = () => node.instance.mediaError({
+  const imgError = () => node.instance.mediaError({
     target: {
       dataset: {
         i: '0'
@@ -225,7 +247,7 @@ test('event', async () => {
     errorImg: 'xxx'
   }, imgError)
   // 模拟链接被点击
-  for (let i = 2; i <= 4; i++)
+  for (let i = 2; i <= 4; i++) {
     node.instance.linkTap({
       currentTarget: {
         dataset: {
@@ -233,13 +255,15 @@ test('event', async () => {
         }
       }
     })
+  }
   // 模拟视频播放
-  for (let i = 0; i < 3; i++)
+  for (let i = 0; i < 3; i++) {
     node.instance.play({
       target: {
         id: 'v' + (i % 2)
       }
     })
+  }
   // 模拟视频出错
   node.instance.mediaError({
     target: {

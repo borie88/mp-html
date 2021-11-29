@@ -13,6 +13,7 @@
 ## 使用方法
 - 源码方式  
   1. 点击上方的使用 `HBuilder X` 导入插件或将下载的插件包拷贝到项目根目录下  
+     由于插件市场的 **非 uni_modules 版本** 无法更新，若需使用请从 [github](https://github.com/jin-yufeng/mp-html/tree/master/dist/uni-app) 或 [gitee](https://gitee.com/jin-yufeng/mp-html/tree/master/dist/uni-app) 获取最新版本
   2. 在需要使用页面的 `(n)vue` 文件中添加  
      ```html
      <mp-html :content="html" />
@@ -56,6 +57,7 @@
      }
      ```
   
+  使用 *cli* 方式运行的项目，通过 *npm* 方式引入时，需要在 *vue.config.js* 中配置 *transpileDependencies*，详情可见 [#330](https://github.com/jin-yufeng/mp-html/issues/330#issuecomment-913617687)  
   如果在 **nvue** 中使用还要将 `dist/uni-app/static` 目录下的内容拷贝到项目的 `static` 目录下，否则无法运行  
 
 查看 [快速开始](https://jin-yufeng.gitee.io/mp-html/#/overview/quickstart) 了解更多
@@ -114,13 +116,14 @@
 | 名称 | 作用 |
 |:---:|---|
 | audio | 音乐播放器 |
-| editable | 富文本编辑 |
+| editable | 富文本编辑（[示例项目](https://6874-html-foe72-1259071903.tcb.qcloud.la/editable.zip?sign=cc0017be203fb3dbca62d33a0c15792e&t=1608447445)） |
 | emoji | 解析 emoji |
 | highlight | 代码块高亮显示 |
 | markdown | 渲染 markdown |
 | search | 关键词搜索 |
 | style | 匹配 style 标签中的样式 |
 | txv-video | 使用腾讯视频 |
+| img-cache | 图片缓存 by [@PentaTea](https://github.com/PentaTea) |
 
 从插件市场导入的包中 **不含有** 扩展插件，需要使用插件参考以下方法：  
 1. 获取完整组件包  
@@ -144,9 +147,8 @@
 ## 关于 nvue
 `nvue` 使用原生渲染，不支持部分 `css` 样式，为实现和 `html` 相同的效果，组件内部通过 `web-view` 进行渲染，性能上差于原生，根据 `weex` 官方建议，`web` 标签仅应用在非常规的降级场景。因此，如果通过原生的方式（如 `richtext`）能够满足需要，则不建议使用本组件，如果有较多的富文本内容，则可以直接使用 `vue` 页面  
 由于渲染方式与其他端不同，有以下限制：  
-1. 默认背景为白色，可以通过 `container-style` 属性修改（设置为透明无效）
-2. 不支持 `lazy-load` 属性
-3. 视频不支持全屏播放
+1. 不支持 `lazy-load` 属性
+2. 视频不支持全屏播放
 
 纯 `nvue` 模式下，[此问题](https://ask.dcloud.net.cn/question/119678) 修复前，不支持通过 `uni_modules` 引入，需要本地引入（将 [dist/uni-app](https://github.com/jin-yufeng/mp-html/tree/master/dist/uni-app) 中的内容拷贝到项目根目录下）  
 
