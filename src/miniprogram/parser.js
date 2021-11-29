@@ -393,9 +393,14 @@ parser.prototype.onOpenTag = function (selfClose) {
                 }
               }
             } else if (style.includes('inline-block')) {
-              if (styleObj.width && styleObj.width[styleObj.width.length - 1] == '%') {
-                item.attrs.style += ';max-width:' + styleObj.width
-                styleObj.width = ''
+              if (
+                styleObj.width
+                && styleObj.width[styleObj.width.length - 1] == '%'
+              ) {
+                // This overwrites parent elements somehow
+                // console.log('inline', item, styleObj, styleObj.width, ';max-width:' + styleObj.width)
+                // item.attrs.style += ';max-width:' + styleObj.width
+                // styleObj.width = ''
               } else
                 item.attrs.style += ';max-width:100%'
             }
