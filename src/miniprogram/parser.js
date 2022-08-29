@@ -432,8 +432,11 @@ Parser.prototype.onOpenTag = function (selfClose) {
               ) {
                 // This overwrites parent elements somehow
                 // console.log('inline', item, styleObj, styleObj.width, ';max-width:' + styleObj.width)
-                // item.attrs.style += ';max-width:' + styleObj.width
-                // styleObj.width = ''
+                if ( styleObj.width === '100%' ) {
+                  styleObj.width = ''
+                } else {
+                  // item.attrs.style += ';max-width:' + styleObj.width
+                }
               } else {
                 item.attrs.style += ';max-width:100%'
               }
